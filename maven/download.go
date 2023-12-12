@@ -30,6 +30,9 @@ func DownloadCommand() *cli.Command {
 			case "assets":
 				var continuationToken = ""
 				return DownloadAssets(baseUrl, username, password, repository, folder, continuationToken)
+			case "browse":
+				var path = ""
+				return DownloadBrowse(baseUrl, username, password, repository, folder, path)
 			default:
 
 			}
@@ -39,7 +42,7 @@ func DownloadCommand() *cli.Command {
 	}
 }
 
-func DownloadAssets(baseUrl string, username string, password string, repository string, folder, continuationToken string) error {
+func DownloadAssets(baseUrl string, username string, password string, repository string, folder string, continuationToken string) error {
 
 	client, err := nexus.NewClient(baseUrl, username, password)
 	if err != nil {
@@ -85,6 +88,49 @@ func DownloadAssets(baseUrl string, username string, password string, repository
 		err = DownloadAssets(baseUrl, username, password, repository, folder, pageAssetXO.ContinuationToken)
 		if err != nil {
 			return err
+		}
+	}
+
+	return nil
+}
+
+func DownloadBrowse(baseUrl string, username string, password string, repository string, folder string, path string) error {
+
+	client, err := nexus.NewClient(baseUrl, username, password)
+	if err != nil {
+		return err
+	}
+
+	browses, response, err := client.ExtDirect.GetBrowseRepository(repository, path)
+	if err != nil {
+		return err
+	}
+	if response.StatusCode != http.StatusOK {
+		return fmt.Errorf("GetBrowseRepository status %s", response.Status)
+	}
+
+	for _, browse := range browses {
+		if browse.Type == "file" {
+			var filePath = filepath.Join(folder, browse.Path)
+			var fileFolder = filepath.Dir(filePath)
+
+			err = os.MkdirAll(fileFolder, os.ModePerm)
+			if err != nil {
+				return err
+			}
+
+			response, err = client.File.Download(http.MethodGet, browse.Url, filePath, nil, nil)
+			if err != nil {
+				return err
+			}
+			if response.StatusCode != http.StatusOK {
+				return fmt.Errorf("Download Browse status %s ", response.Status)
+			}
+		} else {
+			err = DownloadBrowse(baseUrl, username, password, repository, folder, browse.Path)
+			if err != nil {
+				return err
+			}
 		}
 	}
 

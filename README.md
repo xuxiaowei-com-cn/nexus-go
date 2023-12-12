@@ -131,6 +131,7 @@
 ```shell
 go env -w GOPROXY=https://goproxy.cn,direct
 # go env -w GOPROXY=https://mirrors.aliyun.com/goproxy,direct
+# go env -w GOPROXY=https://goproxy.io,direct
 go get -u github.com/urfave/cli/v2
 go get -u github.com/xuxiaowei-com-cn/git-go@main
 go get -u github.com/xuxiaowei-com-cn/go-nexus@main
@@ -207,7 +208,7 @@ COPYRIGHT:
        --username value    Nexus 用户名
        --password value    Nexus 密码
        --repository value  仓库名称
-       --method value      下载方法，如：assets (default: "assets")
+       --method value      下载方法，如：assets、browse (default: "assets")
        --folder value      文件夹
        --help, -h          show help
     ```

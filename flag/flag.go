@@ -41,7 +41,7 @@ func Common(required bool) []cli.Flag {
 func MethodFlag(required bool) cli.Flag {
 	return &cli.StringFlag{
 		Name:     constant.Method,
-		Usage:    "下载方法，如：assets",
+		Usage:    "下载方法，如：assets、browse",
 		Value:    "assets",
 		Required: required,
 		Action: func(context *cli.Context, s string) error {
@@ -51,8 +51,10 @@ func MethodFlag(required bool) cli.Flag {
 			switch method {
 			case "assets":
 				break
+			case "browse":
+				break
 			default:
-				return fmt.Errorf("method 错误，请输入：assets")
+				return fmt.Errorf("method 错误，请输入：assets、browse")
 			}
 
 			return nil
