@@ -31,3 +31,11 @@ build/
 
 ### VS Code ###
 .vscode/
+
+/*.exe
+/*/*.exe
+/nexus-go-windows-*
+/nexus-go-linux-*
+/nexus-go-darwin-*
+
+/buildinfo/buildinfo
