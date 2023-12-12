@@ -133,6 +133,7 @@ go env -w GOPROXY=https://goproxy.cn,direct
 # go env -w GOPROXY=https://mirrors.aliyun.com/goproxy,direct
 go get -u github.com/urfave/cli/v2
 go get -u github.com/xuxiaowei-com-cn/git-go@main
+go get -u github.com/xuxiaowei-com-cn/go-nexus@main
 go get -u gopkg.in/yaml.v3
 ```
 
@@ -176,6 +177,7 @@ AUTHOR:
    徐晓伟 <xuxiaowei@xuxiaowei.com.cn>
 
 COMMANDS:
+   maven    Maven 仓库
    help, h  Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
@@ -185,6 +187,31 @@ GLOBAL OPTIONS:
 COPYRIGHT:
    徐晓伟工作室 <xuxiaowei@xuxiaowei.com.cn>
 ```
+
+- Maven 仓库
+
+    ```shell
+    $ go run main.go maven --help
+    NAME:
+       nexus-go maven - Maven 仓库
+    
+    USAGE:
+       nexus-go maven command [command options] [arguments...]
+    
+    COMMANDS:
+       download, dl  下载
+       help, h       Shows a list of commands or help for one command
+    
+    OPTIONS:
+       --base-url value    Nexus URL
+       --username value    Nexus 用户名
+       --password value    Nexus 密码
+       --repository value  仓库名称
+       --method value      下载方法，如：assets (default: "assets")
+       --folder value      文件夹
+       --help, -h          show help
+    ```
+
 
 ### test
 
