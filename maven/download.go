@@ -1,7 +1,6 @@
 package maven
 
 import (
-	"fmt"
 	"github.com/urfave/cli/v2"
 	"github.com/xuxiaowei-com-cn/go-nexus"
 	"github.com/xuxiaowei-com-cn/nexus-go/common"
@@ -36,7 +35,7 @@ func DownloadCommand() *cli.Command {
 
 			flagInt, writer, err := common.Writer(enableLog, logFolder, logName, microseconds, longFile)
 			if err != nil {
-				return err
+				log.Fatal(err)
 			}
 
 			var c = &nexus.Client{}
@@ -52,16 +51,18 @@ func DownloadCommand() *cli.Command {
 
 			client, err := nexus.BuildClient(c, baseUrl, username, password)
 			if err != nil {
-				return err
+				log.Fatal(err)
 			}
 
 			switch method {
 			case "assets":
 				var continuationToken = ""
-				return DownloadAssets(client, repository, folder, continuationToken)
+				DownloadAssets(client, repository, folder, continuationToken)
+				break
 			case "browse":
 				var path = ""
-				return DownloadBrowse(client, repository, folder, path)
+				DownloadBrowse(client, repository, folder, path)
+				break
 			default:
 
 			}
@@ -71,7 +72,7 @@ func DownloadCommand() *cli.Command {
 	}
 }
 
-func DownloadAssets(client *nexus.Client, repository string, folder string, continuationToken string) error {
+func DownloadAssets(client *nexus.Client, repository string, folder string, continuationToken string) {
 
 	requestQuery := &nexus.ListAssetsQuery{
 		Repository: repository,
@@ -83,10 +84,10 @@ func DownloadAssets(client *nexus.Client, repository string, folder string, cont
 
 	pageAssetXO, response, err := client.Assets.ListAssets(requestQuery)
 	if err != nil {
-		return err
+		log.Fatalf("列出资产异常：%s", err)
 	}
 	if response.StatusCode != http.StatusOK {
-		return fmt.Errorf("ListAssets status %s (%s)", response.Status, continuationToken)
+		log.Fatalf("列出资产状态码异常：%d", response.StatusCode)
 	}
 
 	for _, assetXO := range pageAssetXO.Items {
@@ -96,36 +97,31 @@ func DownloadAssets(client *nexus.Client, repository string, folder string, cont
 
 		err = os.MkdirAll(fileFolder, os.ModePerm)
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 
 		response, err = client.File.Download(http.MethodGet, assetXO.DownloadUrl, filePath, nil, nil)
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 		if response.StatusCode != http.StatusOK {
-			return fmt.Errorf("Download assets status %s (%s) ", response.Status, continuationToken)
+			log.Fatalf("下载资产状态码异常：%d", response.StatusCode)
 		}
 	}
 
 	if pageAssetXO.ContinuationToken != "" {
-		err = DownloadAssets(client, repository, folder, pageAssetXO.ContinuationToken)
-		if err != nil {
-			return err
-		}
+		DownloadAssets(client, repository, folder, pageAssetXO.ContinuationToken)
 	}
-
-	return nil
 }
 
-func DownloadBrowse(client *nexus.Client, repository string, folder string, path string) error {
+func DownloadBrowse(client *nexus.Client, repository string, folder string, path string) {
 
 	browses, response, err := client.ExtDirect.GetBrowseRepository(repository, path)
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 	if response.StatusCode != http.StatusOK {
-		return fmt.Errorf("GetBrowseRepository status %s", response.Status)
+		log.Fatalf("浏览仓库状态码异常：%d", response.StatusCode)
 	}
 
 	for _, browse := range browses {
@@ -135,23 +131,18 @@ func DownloadBrowse(client *nexus.Client, repository string, folder string, path
 
 			err = os.MkdirAll(fileFolder, os.ModePerm)
 			if err != nil {
-				return err
+				log.Fatal(err)
 			}
 
 			response, err = client.File.Download(http.MethodGet, browse.Url, filePath, nil, nil)
 			if err != nil {
-				return err
+				log.Fatal(err)
 			}
 			if response.StatusCode != http.StatusOK {
-				return fmt.Errorf("Download Browse status %s ", response.Status)
+				log.Fatalf("下载仓库文件状态码异常：%d", response.StatusCode)
 			}
 		} else {
-			err = DownloadBrowse(client, repository, folder, browse.Path)
-			if err != nil {
-				return err
-			}
+			DownloadBrowse(client, repository, folder, browse.Path)
 		}
 	}
-
-	return nil
 }
