@@ -77,3 +77,42 @@ func FolderFlag(required bool) cli.Flag {
 		Required: required,
 	}
 }
+
+func EnableLogFlag() cli.Flag {
+	return &cli.BoolFlag{
+		Name:  constant.EnableLog,
+		Usage: "开启日志",
+		Value: false,
+	}
+}
+
+func LogNameFlag() cli.Flag {
+	return &cli.StringFlag{
+		Name:  constant.LogName,
+		Usage: "日志名称-前缀",
+		Value: constant.DefaultLogName,
+	}
+}
+
+func LogFolderFlag() cli.Flag {
+	return &cli.StringFlag{
+		Name:  constant.LogFolder,
+		Usage: fmt.Sprintf("日志文件夹，默认是当前用户主目录下的 %s 文件夹", constant.DefaultLogFolder),
+	}
+}
+
+func MicrosecondsFlag() cli.Flag {
+	return &cli.BoolFlag{
+		Name:  constant.Microseconds,
+		Usage: "日志打印时间精确到微秒",
+		Value: false,
+	}
+}
+
+func LongFileFlag() cli.Flag {
+	return &cli.BoolFlag{
+		Name:  constant.LongFile,
+		Usage: "日志打印使用长包名",
+		Value: false,
+	}
+}

@@ -210,6 +210,11 @@ COPYRIGHT:
        --repository value  仓库名称
        --method value      下载方法，如：assets、browse (default: "assets")
        --folder value      文件夹
+       --enable-log        开启日志 (default: false)
+       --log-name value    日志名称-前缀 (default: "nexus-go")
+       --log-folder value  日志文件夹，默认是当前用户主目录下的 .nexus-go 文件夹
+       --microseconds      日志打印时间精确到微秒 (default: false)
+       --long-file         日志打印使用长包名 (default: false)
        --help, -h          show help
     ```
 

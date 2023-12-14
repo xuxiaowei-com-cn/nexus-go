@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/urfave/cli/v2"
 	"github.com/xuxiaowei-com-cn/go-nexus"
+	"github.com/xuxiaowei-com-cn/nexus-go/common"
 	"github.com/xuxiaowei-com-cn/nexus-go/constant"
 	"github.com/xuxiaowei-com-cn/nexus-go/flag"
 	"net/http"
@@ -17,7 +18,8 @@ func DownloadCommand() *cli.Command {
 		Aliases: []string{"dl"},
 		Usage:   "下载",
 		Flags: append(flag.Common(true), flag.RepositoryFlag(true),
-			flag.MethodFlag(true), flag.FolderFlag(true)),
+			flag.MethodFlag(true), flag.FolderFlag(true),
+			flag.EnableLogFlag(), flag.LogNameFlag(), flag.LogFolderFlag(), flag.MicrosecondsFlag(), flag.LongFileFlag()),
 		Action: func(context *cli.Context) error {
 			var baseUrl = context.String(constant.BaseUrl)
 			var username = context.String(constant.Username)
@@ -25,14 +27,24 @@ func DownloadCommand() *cli.Command {
 			var method = context.String(constant.Method)
 			var repository = context.String(constant.Repository)
 			var folder = context.String(constant.Folder)
+			var enableLog = context.Bool(constant.EnableLog)
+			var logName = context.String(constant.LogName)
+			var logFolder = context.String(constant.LogFolder)
+			var microseconds = context.Bool(constant.Microseconds)
+			var longFile = context.Bool(constant.LongFile)
+
+			c, err := common.Client(enableLog, logFolder, logName, microseconds, longFile)
+			if err != nil {
+				return err
+			}
 
 			switch method {
 			case "assets":
 				var continuationToken = ""
-				return DownloadAssets(baseUrl, username, password, repository, folder, continuationToken)
+				return DownloadAssets(baseUrl, username, password, repository, folder, continuationToken, c)
 			case "browse":
 				var path = ""
-				return DownloadBrowse(baseUrl, username, password, repository, folder, path)
+				return DownloadBrowse(baseUrl, username, password, repository, folder, path, c)
 			default:
 
 			}
@@ -42,9 +54,10 @@ func DownloadCommand() *cli.Command {
 	}
 }
 
-func DownloadAssets(baseUrl string, username string, password string, repository string, folder string, continuationToken string) error {
+func DownloadAssets(baseUrl string, username string, password string, repository string, folder string, continuationToken string,
+	c *nexus.Client) error {
 
-	client, err := nexus.NewClient(baseUrl, username, password)
+	client, err := nexus.BuildClient(c, baseUrl, username, password)
 	if err != nil {
 		return err
 	}
@@ -85,7 +98,7 @@ func DownloadAssets(baseUrl string, username string, password string, repository
 	}
 
 	if pageAssetXO.ContinuationToken != "" {
-		err = DownloadAssets(baseUrl, username, password, repository, folder, pageAssetXO.ContinuationToken)
+		err = DownloadAssets(baseUrl, username, password, repository, folder, pageAssetXO.ContinuationToken, c)
 		if err != nil {
 			return err
 		}
@@ -94,9 +107,10 @@ func DownloadAssets(baseUrl string, username string, password string, repository
 	return nil
 }
 
-func DownloadBrowse(baseUrl string, username string, password string, repository string, folder string, path string) error {
+func DownloadBrowse(baseUrl string, username string, password string, repository string, folder string, path string,
+	c *nexus.Client) error {
 
-	client, err := nexus.NewClient(baseUrl, username, password)
+	client, err := nexus.BuildClient(c, baseUrl, username, password)
 	if err != nil {
 		return err
 	}
@@ -127,7 +141,7 @@ func DownloadBrowse(baseUrl string, username string, password string, repository
 				return fmt.Errorf("Download Browse status %s ", response.Status)
 			}
 		} else {
-			err = DownloadBrowse(baseUrl, username, password, repository, folder, browse.Path)
+			err = DownloadBrowse(baseUrl, username, password, repository, folder, browse.Path, c)
 			if err != nil {
 				return err
 			}
