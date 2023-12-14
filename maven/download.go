@@ -7,6 +7,7 @@ import (
 	"github.com/xuxiaowei-com-cn/nexus-go/common"
 	"github.com/xuxiaowei-com-cn/nexus-go/constant"
 	"github.com/xuxiaowei-com-cn/nexus-go/flag"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -33,7 +34,23 @@ func DownloadCommand() *cli.Command {
 			var microseconds = context.Bool(constant.Microseconds)
 			var longFile = context.Bool(constant.LongFile)
 
-			c, err := common.Client(enableLog, logFolder, logName, microseconds, longFile)
+			flagInt, writer, err := common.Writer(enableLog, logFolder, logName, microseconds, longFile)
+			if err != nil {
+				return err
+			}
+
+			var c = &nexus.Client{}
+
+			c.Flag = flagInt
+			c.Out = writer
+
+			log.SetFlags(flagInt)
+			log.SetOutput(writer)
+
+			context.App.Metadata["flag"] = flagInt
+			context.App.Writer = writer
+
+			client, err := nexus.BuildClient(c, baseUrl, username, password)
 			if err != nil {
 				return err
 			}
@@ -41,10 +58,10 @@ func DownloadCommand() *cli.Command {
 			switch method {
 			case "assets":
 				var continuationToken = ""
-				return DownloadAssets(baseUrl, username, password, repository, folder, continuationToken, c)
+				return DownloadAssets(client, repository, folder, continuationToken)
 			case "browse":
 				var path = ""
-				return DownloadBrowse(baseUrl, username, password, repository, folder, path, c)
+				return DownloadBrowse(client, repository, folder, path)
 			default:
 
 			}
@@ -54,13 +71,7 @@ func DownloadCommand() *cli.Command {
 	}
 }
 
-func DownloadAssets(baseUrl string, username string, password string, repository string, folder string, continuationToken string,
-	c *nexus.Client) error {
-
-	client, err := nexus.BuildClient(c, baseUrl, username, password)
-	if err != nil {
-		return err
-	}
+func DownloadAssets(client *nexus.Client, repository string, folder string, continuationToken string) error {
 
 	requestQuery := &nexus.ListAssetsQuery{
 		Repository: repository,
@@ -98,7 +109,7 @@ func DownloadAssets(baseUrl string, username string, password string, repository
 	}
 
 	if pageAssetXO.ContinuationToken != "" {
-		err = DownloadAssets(baseUrl, username, password, repository, folder, pageAssetXO.ContinuationToken, c)
+		err = DownloadAssets(client, repository, folder, pageAssetXO.ContinuationToken)
 		if err != nil {
 			return err
 		}
@@ -107,13 +118,7 @@ func DownloadAssets(baseUrl string, username string, password string, repository
 	return nil
 }
 
-func DownloadBrowse(baseUrl string, username string, password string, repository string, folder string, path string,
-	c *nexus.Client) error {
-
-	client, err := nexus.BuildClient(c, baseUrl, username, password)
-	if err != nil {
-		return err
-	}
+func DownloadBrowse(client *nexus.Client, repository string, folder string, path string) error {
 
 	browses, response, err := client.ExtDirect.GetBrowseRepository(repository, path)
 	if err != nil {
@@ -141,7 +146,7 @@ func DownloadBrowse(baseUrl string, username string, password string, repository
 				return fmt.Errorf("Download Browse status %s ", response.Status)
 			}
 		} else {
-			err = DownloadBrowse(baseUrl, username, password, repository, folder, browse.Path, c)
+			err = DownloadBrowse(client, repository, folder, browse.Path)
 			if err != nil {
 				return err
 			}

@@ -2,13 +2,12 @@ package main
 
 import (
 	"fmt"
+	"github.com/urfave/cli/v2"
 	"github.com/xuxiaowei-com-cn/git-go/buildinfo"
 	"github.com/xuxiaowei-com-cn/nexus-go/maven"
 	"gopkg.in/yaml.v3"
 	"log"
 	"os"
-
-	"github.com/urfave/cli/v2"
 )
 
 const (
@@ -63,6 +62,10 @@ func main() {
 	}
 
 	if err := app.Run(os.Args); err != nil {
+		if intValue, ok := app.Metadata["flag"].(int); ok {
+			log.SetFlags(intValue)
+		}
+		log.SetOutput(app.Writer)
 		log.Fatal(err)
 	}
 }
