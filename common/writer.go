@@ -24,16 +24,16 @@ func Writer(enableLog bool, logFolder string, logName string, microseconds bool,
 		flag = flag | log.Lshortfile
 	}
 
-	if logFolder == "" {
-		currentUser, err := user.Current()
-		if err != nil {
-			return flag, nil, err
-		}
-		homeDir := currentUser.HomeDir
-		logFolder = filepath.Join(homeDir, constant.DefaultLogFolder)
-	}
-
 	if enableLog {
+		if logFolder == "" {
+			currentUser, err := user.Current()
+			if err != nil {
+				return flag, nil, err
+			}
+			homeDir := currentUser.HomeDir
+			logFolder = filepath.Join(homeDir, constant.DefaultLogFolder)
+		}
+
 		_, err := os.Stat(logFolder)
 
 		if os.IsNotExist(err) {
