@@ -17,7 +17,7 @@ func BaseUrlFlag(required bool) cli.Flag {
 func UsernameFlag(required bool) cli.Flag {
 	return &cli.StringFlag{
 		Name:     constant.Username,
-		Usage:    "Nexus 用户名",
+		Usage:    "Nexus 用户名，匿名访问请填写空",
 		Required: required,
 	}
 }
@@ -25,7 +25,7 @@ func UsernameFlag(required bool) cli.Flag {
 func PasswordFlag(required bool) cli.Flag {
 	return &cli.StringFlag{
 		Name:     constant.Password,
-		Usage:    "Nexus 密码",
+		Usage:    "Nexus 密码，匿名访问请填写空",
 		Required: required,
 	}
 }
