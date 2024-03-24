@@ -201,6 +201,7 @@ COPYRIGHT:
     
     COMMANDS:
        download, dl  下载
+       upload, up    上传
        help, h       Shows a list of commands or help for one command
     
     OPTIONS:

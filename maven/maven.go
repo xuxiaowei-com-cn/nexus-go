@@ -14,6 +14,7 @@ func MavenCommand() *cli.Command {
 			flag.EnableLogFlag(), flag.LogNameFlag(), flag.LogFolderFlag(), flag.MicrosecondsFlag(), flag.LongFileFlag()),
 		Subcommands: []*cli.Command{
 			DownloadCommand(),
+			UploadCommand(),
 		},
 	}
 }
