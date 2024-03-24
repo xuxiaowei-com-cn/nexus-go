@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/urfave/cli/v2 v2.26.0
 	github.com/xuxiaowei-com-cn/git-go v0.0.0-20231127015559-635f5e3143dc
-	github.com/xuxiaowei-com-cn/go-nexus v0.0.2-0.20240324142356-a39bcc869b6e
+	github.com/xuxiaowei-com-cn/go-nexus v0.0.2-0.20240324154157-eb8f7ad636d6
 	gopkg.in/yaml.v3 v3.0.1
 )
 
